@@ -1,0 +1,87 @@
+# A basic workflow 
+
+name: Update-data
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "12 7 */1 * *" # Every 1 day at 7:12 AM
+    # - cron: "0 */6 * * *" # Every 6th hour at 0:00
+    # Great way to figure this out: https://crontab.guru/#0_*/6_*_*_*
+    
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs: 
+ autoscrape:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    env:
+      REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+      GDRIVE_PAT: ${{ secrets.GDRIVE_PAT }}
+      username: github-actions
+
+    # Load repo and install R
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      
+    - name: Setup R
+      uses: r-lib/actions/setup-r@v2
+      with: 
+          r-version: '4.2.2' # The R version to download (if necessary) and use.
+          # r-version: ${{ matrix.R }}
+          # Enable RStudio Package Manager to speed up package installation
+          use-public-rspm: true
+      # with:
+      #   r-version: ${{ matrix.config.r }} 
+      #   # Enable RStudio Package Manager to speed up package installation
+      #   use-public-rspm: true
+
+    # Set-up R
+    # - name: Install packages
+    #   run: |
+    #     R -e 'install.packages("googledrive")'
+    #     R -e 'install.packages("dplyr")'
+    #     R -e 'install.packages("ggplot2")'
+    #     R -e 'install.packages("tidyr")'
+    #     R -e 'install.packages("readr")'
+    #     R -e 'install.packages("patchwork")'
+    #     R -e 'install.packages("lubridate")'
+    #     R -e 'install.packages("oce")'
+    #     
+    - name: Install packages
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        packages: |
+          any::lubridate
+          any::googledrive
+          any::ggplot2
+          any::tidyr
+          any::readr
+          any::patchwork
+          any::oce
+          any::zoo
+      
+    # Run R script
+    - name: Scrape
+      run: |
+        Rscript src/PullBB.R
+        Rscript src/PullMet.R
+      
+ # Add new files in data folder, commit along with other modified files, push
+    - name: Commit files
+      run: |
+        git config --local user.name actions-user
+        git config --local user.email "actions@github.com"
+        git add Figures/*
+        git commit -am "GH ACTION Headlines $(date)"
+        git push origin main
+      env:
+        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+        username: github-actions
