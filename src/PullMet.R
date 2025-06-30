@@ -106,11 +106,12 @@ p.batt = ggplot(met.df |> filter(Var == 'BattV_Min')) +
   ylim(9,NA) +
   ylab('Battery (V)') +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
-  facet_wrap(~sitename, ncol = 3)
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
+  facet_wrap(~sitename, ncol = 4)
 
 # Save figure 
-ggsave('Figures/Met_Battery.png', width = 12, height = 10)
+ggsave('Figures/Met_Battery.png', width = 6, height = 6)
 
 # Just pressure plot
 p.pressure = ggplot(met.df |> filter(Var == 'Pressure') |> filter(value > 700 & value < 1050)) +
@@ -121,7 +122,7 @@ p.pressure = ggplot(met.df |> filter(Var == 'Pressure') |> filter(value > 700 & 
   theme(axis.title.x = element_blank()) 
 
 # Save figure 
-ggsave('Figures/Met_Pressure.png', width = 12, height = 10)
+ggsave('Figures/Met_Pressure.png', width = 6, height = 4)
 
 # Plot of sonics 
 sonic_old = met.df |>
@@ -147,24 +148,26 @@ p.sonic = met.df |>
   xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
   ylab('Distance (cm)') +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
   facet_wrap(~sitename, scales = 'free_y', ncol = 3)
 # # Save figure 
-ggsave('Figures/Met_Sonic_Adjusted.png', width = 12, height = 10)
+ggsave('Figures/Met_Sonic_Adjusted.png', width = 6, height = 6)
 
 
 # Figure of soil temp
 p.soil0 = ggplot(met.df |> filter(Var %in% c('SoilT0cm'))) +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
   geom_path(data = met.df |> filter(Var %in% c('SoilT10cm')), aes(x = TIMESTAMP, y = value), 
-            color = 'black', width = 0.3) +
+            color = 'black', linewidth = 0.3) +
   xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
   ylab('Soil Temp (°C)') +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
   facet_wrap(~sitename, scales = 'free_y', ncol = 3)
 # Save figure 
-ggsave(plot = p.soil0, 'Figures/Met_SoilTemp0.png', width = 12, height = 10)
+ggsave(plot = p.soil0, 'Figures/Met_SoilTemp0.png', width = 6, height = 6)
 
 
 # Figure of airtemp + wind speed from met stations 
@@ -175,11 +178,12 @@ p.air = ggplot(met.df |> filter(Var == 'AirT3m')) +
   xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
   ylab('Air Temp (°C) and Wind Speed (m/s)') +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
   facet_wrap(~sitename, ncol = 3)
 
 # Save figure 
-ggsave(plot = p.air, 'Figures/Met_AirT3m_WSpd.png', width = 12, height = 10)
+ggsave(plot = p.air, 'Figures/Met_AirT3m_WSpd.png', width = 6, height = 6)
 
 # Figure of airtemp + wind speed from met stations from last two weeks 
 p.2weeks = ggplot(met.df |> filter(Var == 'AirT3m') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 14))) +
@@ -189,11 +193,12 @@ p.2weeks = ggplot(met.df |> filter(Var == 'AirT3m') |> filter(TIMESTAMP > as.POS
   xlim(as.POSIXct(Sys.Date() - 14), Sys.Date() + 1) +
   ylab('Air Temp (°C) and Wind Speed (m/s)') +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
   facet_wrap(~sitename, ncol = 3)
 
 # Save figure 
-ggsave(plot = p.2weeks, 'Figures/Met_AirT3m_WSpd_2weeks.png', width = 12, height = 10)
+ggsave(plot = p.2weeks, 'Figures/Met_AirT3m_WSpd_2weeks.png', width = 6, height = 6)
 
 
 # Glacier stations

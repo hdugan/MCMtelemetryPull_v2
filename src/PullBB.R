@@ -110,7 +110,8 @@ p.stage = bb.df |> filter(Var %in% c('stage_Avg')) |>
   ylab('Stage (m)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "#43b284", "#fab255")) +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
   facet_wrap(~sitename, scales = 'free_y')
 
 # Save figure 
@@ -125,7 +126,8 @@ p.ablation = bb.df |> filter(Var %in% c('ablation_Avg')) |>
   ylab('Ablation (m)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "#43b284", "#fab255")) +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
   facet_wrap(~sitename, scales = 'free_y')
 
 # Save figure 
@@ -160,9 +162,10 @@ p.battery = ggplot(bb.df |> filter(Var == 'BattV_Min') |>
   ylab('Battery (V)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "#43b284", "#fab255")) +
   theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
   facet_wrap(~sitename)
 
 # Save figure 
-ggsave(plot = p.battery, 'Figures/BB_Battery.png', width = 12, height = 10)
+ggsave(plot = p.battery, 'Figures/BB_Battery.png', width = 6, height = 6)
 
