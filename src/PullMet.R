@@ -186,6 +186,8 @@ p.air = ggplot(met.df |> filter(Var == 'AirT3m')) +
 ggsave(plot = p.air, 'Figures/Met_AirT3m_WSpd.png', width = 6, height = 6)
 
 # Figure of airtemp + wind speed from met stations from last two weeks 
+
+if(max(met.df$TIMESTAMP) > (as.POSIXct(Sys.Date() - 14))) {
 p.2weeks = ggplot(met.df |> filter(Var == 'AirT3m') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 14))) +
   geom_path(data = met.df |> filter(Var == 'WSpd_Avg') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 14)), 
             aes(x = TIMESTAMP, y = value), color = 'black', linewidth = 0.3) +
@@ -199,7 +201,7 @@ p.2weeks = ggplot(met.df |> filter(Var == 'AirT3m') |> filter(TIMESTAMP > as.POS
 
 # Save figure 
 ggsave(plot = p.2weeks, 'Figures/Met_AirT3m_WSpd_2weeks.png', width = 6, height = 6)
-
+}
 
 # Glacier stations
 glacier.df = met.df |> 
