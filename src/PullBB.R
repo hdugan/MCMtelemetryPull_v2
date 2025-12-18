@@ -31,7 +31,6 @@ drive_download(as_id('1-B-pKHyjdibOCevghndiTYnx-bXoAIWX'), path = 'TempData/LHBB
 drive_get(id = '1PEsP9ctqs1POyRdQ9DLw3H3pKgFeyskP')
 drive_download(as_id('1PEsP9ctqs1POyRdQ9DLw3H3pKgFeyskP'), path = 'TempData/ELBBB_15min.dat', overwrite = TRUE)
 
-# WLBBB_15min.dat
 drive_get(id = '10wlT2XtOglhaL2zosDCfwcD_PCm8Jds0')
 drive_download(as_id('10wlT2XtOglhaL2zosDCfwcD_PCm8Jds0'), path = 'TempData/WLBBB_15min.dat', overwrite = TRUE)
 
@@ -66,7 +65,7 @@ for (i in 1:length(sitenames)) {
     mutate(DO.actualDeep.mgl = DOsolubilitybot * OSat_DOdeep_Avg/100)
     
   # Convert to long 
-  bb.df.long = bb.df |> select(-RECORD, -Year, -(Day_of_Year:DecTime_2)) |>
+  bb.df.long = bb.df |> select(-RECORD, -Year, -(Day_of_Year:MilitaryTime)) |>
     arrange(TIMESTAMP) |>
     pivot_longer(cols = -c(TIMESTAMP, sitename), names_to = 'Var')
 
@@ -75,7 +74,7 @@ for (i in 1:length(sitenames)) {
 
 bb.df = do.call(bind_rows, bb.long.list) |> 
   mutate(sitename = factor(sitename, levels = c('LFBB','LHBB','ELBB','WLBB'))) |> 
-  filter(TIMESTAMP >= as.POSIXct('2023-11-24'))
+  filter(TIMESTAMP >= as.POSIXct('2025-11-01'))
 
 ### Remove temp files
 removefiles = list(list.files("TempData/", full.names = TRUE, pattern = '.dat'))
@@ -86,10 +85,10 @@ do.call(file.remove, removefiles)
 p.bb = bb.df |> filter(Var %in% c('PTemp_C', 'stage_Avg', 'OSat_Dshallow_Avg',
                                   'OSat_DOdeep_Avg', 'ablation_Avg', 'BattV_Min')) |>
   mutate(value = if_else(Var != 'PTemp_C' & value < 1, NA, value)) |>
-  filter(TIMESTAMP >= as.POSIXct('2024-11-15')) |> 
+  filter(TIMESTAMP >= as.POSIXct('2025-11-01')) |> 
   ggplot() +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   # ylab('Temp (°C)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "#43b284", "#fab255")) +
   theme_bw(base_size = 10) +
@@ -103,10 +102,10 @@ ggsave(plot = p.bb, 'Figures/BB_Telemetry.png', width = 8, height = 5)
 ### Plot stage
 p.stage = bb.df |> filter(Var %in% c('stage_Avg')) |>
   filter(value >= 6.5) |> 
-  filter(TIMESTAMP >= as.POSIXct('2024-11-15')) |> 
+  filter(TIMESTAMP >= as.POSIXct('2025-11-01')) |> 
   ggplot() +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('Stage (m)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "#43b284", "#fab255")) +
   theme_bw(base_size = 10) +
@@ -119,10 +118,10 @@ ggsave(plot = p.stage, 'Figures/BB_Stage.png', width = 8, height = 5)
 
 ### Plot ablation
 p.ablation = bb.df |> filter(Var %in% c('ablation_Avg')) |>
-  filter(TIMESTAMP >= as.POSIXct('2024-11-15')) |> 
+  filter(TIMESTAMP >= as.POSIXct('2025-11-01')) |> 
   ggplot() +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('Ablation (m)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "#43b284", "#fab255")) +
   theme_bw(base_size = 10) +
@@ -139,10 +138,10 @@ p.oxygen = bb.df |> filter(Var %in% c(#'OSat_Dshallow_Avg','OSat_DOdeep_Avg',
   "Conc_mgL_DOshallow_Avg", "Conc_mgL_DOdeep_Avg",
   "DO.actualShallow.mgl", "DO.actualDeep.mgl")) |> 
   filter(value > 1) |> 
-  filter(TIMESTAMP >= as.POSIXct('2024-11-15'))|> 
+  filter(TIMESTAMP >= as.POSIXct('2025-11-01'))|> 
   ggplot() +
   geom_path(aes(x = TIMESTAMP, y = value, color = Var)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('DO (mg/L)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "red4", "navy")) +
   theme_bw(base_size = 10) +
@@ -156,9 +155,9 @@ ggsave(plot = p.oxygen, 'Figures/BB_Oxygen.png', width = 12, height = 10)
 # Just battery plots
 p.battery = ggplot(bb.df |> filter(Var == 'BattV_Min') |> 
                      filter(value > 1) |> 
-                     filter(TIMESTAMP >= as.POSIXct('2024-11-15'))) +
+                     filter(TIMESTAMP >= as.POSIXct('2025-11-01'))) +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('Battery (V)') +
   scale_color_manual(values = c("#dd5129", "#0f7ba2", "#43b284", "#fab255")) +
   theme_bw(base_size = 10) +

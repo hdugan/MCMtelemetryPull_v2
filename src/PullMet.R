@@ -77,11 +77,10 @@ for (i in 1:length(sitenames)) {
 
   if (!'Day_of_Year' %in% names(met.df)){
     met.df = met.df |> mutate(Day_of_Year = yday(TIMESTAMP))
-    met.df = met.df |> mutate(DecTime_2 = NA_complex_)
   }
   
   # Convert to long 
-  met.df.long = met.df |> select(-RECORD, -Year, -(Day_of_Year:DecTime_2)) |>
+  met.df.long = met.df |> select(-RECORD, -Year, -(Day_of_Year:MilitaryTime)) |>
     arrange(TIMESTAMP) |>
     pivot_longer(cols = -c(TIMESTAMP, sitename), names_to = 'Var')
   
@@ -89,7 +88,7 @@ for (i in 1:length(sitenames)) {
 }
 
 met.df = do.call(bind_rows, met.long.list) |> 
-  filter(TIMESTAMP >= as.POSIXct('2023-11-22'))
+  filter(TIMESTAMP >= as.POSIXct('2025-11-01'))
 
 ### Remove temp files
 removefiles = list(list.files("TempData/", full.names = TRUE, pattern = '.dat'))
@@ -102,7 +101,7 @@ table(met.df$Var)
 p.batt = ggplot(met.df |> filter(Var == 'BattV_Min')) +
   geom_hline(aes(yintercept = 12), linetype = 2, linewidth = 0.2) +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylim(9,NA) +
   ylab('Battery (V)') +
   theme_bw(base_size = 10) +
@@ -116,7 +115,7 @@ ggsave('Figures/Met_Battery.png', width = 6, height = 6)
 # Just pressure plot
 p.pressure = ggplot(met.df |> filter(Var == 'Pressure') |> filter(value > 700 & value < 1050)) +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('Pressure (mb)') +
   theme_bw(base_size = 10) +
   theme(axis.title.x = element_blank()) 
@@ -125,27 +124,27 @@ p.pressure = ggplot(met.df |> filter(Var == 'Pressure') |> filter(value > 700 & 
 ggsave('Figures/Met_Pressure.png', width = 6, height = 4)
 
 # Plot of sonics 
-sonic_old = met.df |>
-  filter(Var %in% c('Depth', 'AirT3m')) |>
-  pivot_wider(names_from = Var, values_from = value, values_fn = mean) |>
-  filter(!is.na(Depth)) |> 
-  mutate(TCDT = Depth * sqrt((AirT3m + 273.15)/273.15)) |> 
-  select(TIMESTAMP, sitename, TCDT)
+# sonic_old = met.df |>
+#   filter(Var %in% c('Depth', 'AirT3m')) |>
+#   pivot_wider(names_from = Var, values_from = value, values_fn = mean) |>
+#   filter(!is.na(Depth)) |> 
+#   mutate(TCDT = Depth * sqrt((AirT3m + 273.15)/273.15)) |> 
+#   select(TIMESTAMP, sitename, TCDT)
 
 
 p.sonic = met.df |>
   filter(Var %in% c('TCDT')) |>
   pivot_wider(names_from = Var, values_from = value, values_fn = mean) |>
-  bind_rows(sonic_old) |> 
+  # bind_rows(sonic_old) |> 
   # mutate(TCDT = Depth * sqrt((AirT3m + 273.15)/273.15)) |>
   filter(TCDT > 0 & TCDT < 600) |>
-  mutate(TCDT = if_else(sitename == 'BOYM' & TCDT > 55, NA, TCDT)) |>
-  mutate(TCDT = if_else(sitename == 'BOYM' & TCDT < 45, NA, TCDT)) |>
+  # mutate(TCDT = if_else(sitename == 'BOYM' & TCDT > 55, NA, TCDT)) |>
+  # mutate(TCDT = if_else(sitename == 'BOYM' & TCDT < 45, NA, TCDT)) |>
   mutate(ma2=rollapply(TCDT,12,mean,align='right',fill=NA)) |>
-  filter(TIMESTAMP >= as.POSIXct('2024-11-15')) |>
+  filter(TIMESTAMP >= as.POSIXct('2025-11-01')) |>
   ggplot() +
   geom_path(aes(x = TIMESTAMP, y = ma2, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('Distance (cm)') +
   theme_bw(base_size = 10) +
   theme(axis.title.x = element_blank(),
@@ -160,7 +159,7 @@ p.soil0 = ggplot(met.df |> filter(Var %in% c('SoilT0cm'))) +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
   geom_path(data = met.df |> filter(Var %in% c('SoilT10cm')), aes(x = TIMESTAMP, y = value), 
             color = 'black', linewidth = 0.3) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('Soil Temp (°C)') +
   theme_bw(base_size = 10) +
   theme(axis.title.x = element_blank(),
@@ -175,7 +174,7 @@ p.air = ggplot(met.df |> filter(Var == 'AirT3m')) +
   geom_path(data = met.df |> filter(Var == 'WSpd_Avg'), 
             aes(x = TIMESTAMP, y = value), color = 'black', linewidth = 0.3) +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2024-11-15'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   ylab('Air Temp (°C) and Wind Speed (m/s)') +
   theme_bw(base_size = 10) +
   theme(axis.title.x = element_blank(),
@@ -215,7 +214,7 @@ p.metground = met.df |> filter(Var %in% c('AirT3m', 'WSpd_Avg', 'SwRadIn',
                             'BattV_Min')) |> 
   ggplot() +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2023-11-22'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   # ylab('Temp (°C)') +
   scale_color_manual(values = c("#bd3106", "#d9700e", "#e9a00e", "#eebe04", "#5b7314",
                                 "#c3d6ce", "#89a6bb", "#454b87", "#190730")) +
@@ -232,7 +231,7 @@ p.glaciers = glacier.df |> filter(Var %in% c('AirT3m', 'WSpd_Avg', 'SwRadIn',
                                 'BattV_Min')) |> 
   ggplot() +
   geom_path(aes(x = TIMESTAMP, y = value, color = sitename)) +
-  xlim(as.POSIXct('2023-11-22'), Sys.Date() + 1) +
+  xlim(as.POSIXct('2025-11-01'), Sys.Date() + 1) +
   # ylab('Temp (°C)') +
   scale_color_manual(values = c("#bd3106", "#eebe04", "#5b7314",
                                 "#454b87")) +
@@ -288,5 +287,38 @@ p3 = ggplot(fryx) +
 
 p.frx = p1 / p2 / p3
 ggsave(plot = p.frx, 'Figures/Met_FryxellCurrent.png', width = 6, height = 6, dpi = 500)
+
+# Last week at Lake Bonney 
+boym = met.df |> filter(sitename %in% c('BOYM')) |> 
+  filter(Var %in% c('AirT3m', 'WSpd_Avg', 'SwRadIn')) |> 
+  pivot_wider(names_from = Var, values_from = value) |> 
+  filter(TIMESTAMP >= as.POSIXct(Sys.Date() - 7))
+
+p1 = ggplot(boym) +
+  geom_path(aes(x = TIMESTAMP, y = AirT3m), color = "#bd3106") +
+  xlim(as.POSIXct(Sys.Date() - 7), Sys.Date() + 1) +
+  ylab('Air Temp (°C)') +
+  theme_bw(base_size = 10) +
+  theme(axis.title.x = element_blank()) +
+  labs(title = 'Last week at Lake Bonney') 
+
+p2 = ggplot(boym) +
+  geom_path(aes(x = TIMESTAMP, y = SwRadIn), color = "#eebe04") +
+  xlim(as.POSIXct(Sys.Date() - 7), Sys.Date() + 1) +
+  ylab('Solar Radiation (W/m2)') +
+  theme_bw(base_size = 10) +
+  theme(axis.title.x = element_blank()) 
+
+p3 = ggplot(boym) +
+  geom_path(aes(x = TIMESTAMP, y = WSpd_Avg), color = "#82a1bd") +
+  xlim(as.POSIXct(Sys.Date() - 7), Sys.Date() + 1) +
+  ylab('Wind Speed (m/s)') +
+  theme_bw(base_size = 10) +
+  theme(axis.title.x = element_blank()) 
+
+p.boym = p1 / p2 / p3
+ggsave(plot = p.boym, 'Figures/Met_BonneyCurrent.png', width = 6, height = 6, dpi = 500)
+
+
 
 
