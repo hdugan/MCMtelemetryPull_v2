@@ -80,7 +80,11 @@ for (i in 1:length(sitenames)) {
   }
   
   # Convert to long 
-  met.df.long = met.df |> select(-RECORD, -Year, -(Day_of_Year:MilitaryTime)) |>
+  cols_to_drop <- c("RECORD", "Year", "Day_of_Year", "MilitaryTime", 
+                    "DecTime", "DecTime_2", "Test")
+  
+  met.df.long = met.df |> 
+    select(-any_of(cols_to_drop)) |>
     arrange(TIMESTAMP) |>
     pivot_longer(cols = -c(TIMESTAMP, sitename), names_to = 'Var')
   
