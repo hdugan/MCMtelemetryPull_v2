@@ -206,6 +206,66 @@ p.2weeks = ggplot(met.df |> filter(Var == 'AirT3m') |> filter(TIMESTAMP > as.POS
 ggsave(plot = p.2weeks, 'Figures/Met_AirT3m_WSpd_2weeks.png', width = 6, height = 6)
 }
 
+# Figure of wind speeds (avg and max) and direction from met stations from last week 
+arrow_len <- 3  # mph units
+dir.df <- met.df |>
+  filter(
+    Var == "WDir_DU_WVT",
+    TIMESTAMP > as.POSIXct(Sys.Date() - 7)
+  ) |>
+  mutate(
+    # convert FROM-direction to TO-direction (optional)
+    dir_rad = (180 + value) * pi / 180,
+    xtemp = arrow_len * sin(dir_rad),
+    xend = TIMESTAMP + 120*60*arrow_len * sin(dir_rad),
+    y    = 0,
+    yend = arrow_len * cos(dir_rad)
+  ) |> 
+  filter(minute(TIMESTAMP) == 0, hour(TIMESTAMP) %% 2 == 0) # keep every 2nd hour
+
+ggplot(met.df |> filter(Var == 'WSpd_Max') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7))) +
+  geom_path(data = met.df |> filter(Var == 'WSpd_Avg') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7)), 
+            aes(x = TIMESTAMP, y = value*2.23694), color = 'black', linewidth = 0.3) +
+  geom_path(aes(x = TIMESTAMP, y = value*2.23694, color = sitename)) +
+  ## wind direction arrows
+  geom_segment(
+    data = dir.df,
+    aes(x = TIMESTAMP, xend = xend, y = y, yend = yend),
+    arrow = arrow(length = unit(0.02, "inches")),
+    linewidth = 0.2,
+    color = "black"
+  ) +
+  xlim(as.POSIXct(Sys.Date() - 7), Sys.Date() + 1) +
+  ylab('Wind Speed (mph)') +
+  theme_bw(base_size = 10) +
+  theme(axis.title.x = element_blank(),
+        legend.position = 'none') +
+  facet_wrap(~sitename, ncol = 3)
+
+if(max(met.df$TIMESTAMP) > (as.POSIXct(Sys.Date() - 7))) {
+  p.2weeks.wind = ggplot(met.df |> filter(Var == 'WSpd_Max') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7))) +
+    geom_path(data = met.df |> filter(Var == 'WSpd_Avg') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7)), 
+              aes(x = TIMESTAMP, y = value*2.23694), color = 'black', linewidth = 0.3) +
+    geom_path(aes(x = TIMESTAMP, y = value*2.23694, color = sitename)) +
+    ## wind direction arrows
+    geom_segment(
+      data = dir.df,
+      aes(x = TIMESTAMP, xend = xend, y = y, yend = yend),
+      arrow = arrow(length = unit(0.02, "inches")),
+      linewidth = 0.2,
+      color = "black"
+    ) +
+    xlim(as.POSIXct(Sys.Date() - 7), Sys.Date() + 1) +
+    ylab('Wind Speed (mph)') +
+    theme_bw(base_size = 10) +
+    theme(axis.title.x = element_blank(),
+          legend.position = 'none') +
+    facet_wrap(~sitename, ncol = 3); p.2weeks.wind   ## wind direction arrows
+  
+  # Save figure 
+  ggsave(plot = p.2weeks, 'Figures/Met_WSpd_1weeks.png', width = 6, height = 6)
+}
+
 # Glacier stations
 glacier.df = met.df |> 
   filter(sitename %in% c('CAAM','COHM','HODM','TARM'))
