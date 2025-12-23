@@ -223,25 +223,6 @@ dir.df <- met.df |>
   ) |> 
   filter(minute(TIMESTAMP) == 0, hour(TIMESTAMP) %% 2 == 0) # keep every 2nd hour
 
-ggplot(met.df |> filter(Var == 'WSpd_Max') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7))) +
-  geom_path(data = met.df |> filter(Var == 'WSpd_Avg') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7)), 
-            aes(x = TIMESTAMP, y = value*2.23694), color = 'black', linewidth = 0.3) +
-  geom_path(aes(x = TIMESTAMP, y = value*2.23694, color = sitename)) +
-  ## wind direction arrows
-  geom_segment(
-    data = dir.df,
-    aes(x = TIMESTAMP, xend = xend, y = y, yend = yend),
-    arrow = arrow(length = unit(0.02, "inches")),
-    linewidth = 0.2,
-    color = "black"
-  ) +
-  xlim(as.POSIXct(Sys.Date() - 7), Sys.Date() + 1) +
-  ylab('Wind Speed (mph)') +
-  theme_bw(base_size = 10) +
-  theme(axis.title.x = element_blank(),
-        legend.position = 'none') +
-  facet_wrap(~sitename, ncol = 3)
-
 if(max(met.df$TIMESTAMP) > (as.POSIXct(Sys.Date() - 7))) {
   p.2weeks.wind = ggplot(met.df |> filter(Var == 'WSpd_Max') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7))) +
     geom_path(data = met.df |> filter(Var == 'WSpd_Avg') |> filter(TIMESTAMP > as.POSIXct(Sys.Date() - 7)), 
@@ -263,7 +244,7 @@ if(max(met.df$TIMESTAMP) > (as.POSIXct(Sys.Date() - 7))) {
     facet_wrap(~sitename, ncol = 3); p.2weeks.wind   ## wind direction arrows
   
   # Save figure 
-  ggsave(plot = p.2weeks, 'Figures/Met_WSpd_1weeks.png', width = 6, height = 6)
+  ggsave(plot = p.2weeks.wind, 'Figures/Met_WSpd_1week.png', width = 6, height = 6)
 }
 
 # Glacier stations
