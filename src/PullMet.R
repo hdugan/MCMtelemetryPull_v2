@@ -336,6 +336,7 @@ ggsave(plot = p.frx, 'Figures/Met_FryxellCurrent.png', width = 6, height = 6, dp
 # Last week at Lake Bonney 
 boym = met.df |> filter(sitename %in% c('BOYM')) |> 
   filter(Var %in% c('AirT3m', 'WSpd_Avg', 'SwRadIn')) |> 
+  distinct(TIMESTAMP, Var, .keep_all = TRUE) |>
   pivot_wider(names_from = Var, values_from = value) |> 
   filter(TIMESTAMP >= as.POSIXct(Sys.Date() - 7))
 
